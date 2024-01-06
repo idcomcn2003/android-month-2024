@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
                     String string = response.body().string();
                     Log.d("idcomcn", "response=====" + string);
                     //idcomcn TODO
-                    textView.setText(string.substring(0,10));
+                    textView.setText("下载完成。");
                     response.body().close();
                 } catch (IOException e) {
                     e.printStackTrace();
