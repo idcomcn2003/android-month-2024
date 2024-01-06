@@ -1,15 +1,20 @@
 package com.czh.myapplication;
 
 import android.os.Bundle;
-import android.widget.SeekBar;
+import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.IOException;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class MainActivity extends AppCompatActivity {
 
-    private SeekBar seekBar;
     private TextView textView;
 
     @Override
@@ -20,27 +25,36 @@ public class MainActivity extends AppCompatActivity {
         bindViews();
     }
 
+
     private void bindViews() {
         textView = findViewById(R.id.text_view);
-        seekBar = findViewById(R.id.seek_bar);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                textView.setText("当前进度值:" + progress + " /100");
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                Toast.makeText(MainActivity.this, "触碰SeekBar", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                Toast.makeText(MainActivity.this, "放开SeekBar", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
+    public void onClickGet(View view) {
+        Log.e("idcomcn", "onClick: 点击了确定");
+        final OkHttpClient okHttpClient = new OkHttpClient()
+                .newBuilder()
+                .build();
+        final Request request = new Request.Builder()
+                .url("https://www.publicobject.com/helloworld.txt")
+                .header("User-Agent", "OkHttp Example")
+                .build();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Response response = okHttpClient.newCall(request).execute();
+                    String string = response.body().string();
+                    Log.d("idcomcn", "response=====" + string);
+                    //idcomcn TODO
+                    textView.setText(string.substring(0,10));
+                    response.body().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+    }
 
 }
