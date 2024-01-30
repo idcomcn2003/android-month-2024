@@ -1,5 +1,7 @@
 package com.czh.myapplication;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -7,54 +9,56 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.IOException;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-
 public class MainActivity extends AppCompatActivity {
 
-    private TextView textView;
+    private TextView textView1;
+    private TextView textView2;
+    private TextView textView3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         bindViews();
     }
 
-
     private void bindViews() {
-        textView = findViewById(R.id.text_view);
+        textView1 = findViewById(R.id.text_view1);
+        textView2 = findViewById(R.id.text_view2);
+        textView3 = findViewById(R.id.text_view3);
     }
 
     public void onClickGet(View view) {
         Log.e("idcomcn", "onClick: 点击了确定");
-        final OkHttpClient okHttpClient = new OkHttpClient()
-                .newBuilder()
-                .build();
-        final Request request = new Request.Builder()
-                .url("https://www.publicobject.com/helloworld.txt")
-                .header("User-Agent", "OkHttp Example")
-                .build();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Response response = okHttpClient.newCall(request).execute();
-                    String string = response.body().string();
-                    Log.d("idcomcn", "response=====" + string);
-                    //idcomcn TODO
-                    textView.setText("下载完成。");
-                    response.body().close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+        activityManager.getMemoryInfo(memoryInfo);
 
+        long totalMemory = memoryInfo.totalMem;
+        long availableMemory = memoryInfo.availMem;
+        long usedMemory = totalMemory - availableMemory;
+
+        textView1.setText("总内存大小：" + formatSize(totalMemory));
+        textView2.setText("可用内存大小：" + formatSize(availableMemory));
+        textView3.setText("已用内存大小：" + formatSize(usedMemory));
     }
 
+    private String formatSize(long size) {
+        String suffix = "B";
+        double value = size;
+
+        if (value >= 1024) {
+            suffix = "KB";
+            value /= 1024;
+        }
+        if (value >= 1024) {
+            suffix = "MB";
+            value /= 1024;
+        }
+        if (value >= 1024) {
+            suffix = "GB";
+            value /= 1024;
+        }
+        return String.format("%.2f%s", value, suffix);
+    }
 }
